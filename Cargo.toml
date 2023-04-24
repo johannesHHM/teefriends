@@ -8,3 +8,4 @@ edition = "2021"
 [dependencies]
 serverbrowse = { git = "https://github.com/heinrich5991/libtw2.git" }
 tokio = { version = "1", features = ["full"] }
+futures = "0.3"
