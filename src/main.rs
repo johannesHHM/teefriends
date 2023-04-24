@@ -1,6 +1,5 @@
 use serverbrowse::protocol::*;
 use std::vec;
-use std::{thread, time};
 
 mod network;
 mod settings;
@@ -10,43 +9,12 @@ use crate::settings::*;
 
 #[tokio::main]
 async fn main() {
-
-    /* let socket = UdpSocket::bind("0.0.0.0:0").await.expect("could not bind socket");
-
-    send_master_request(&socket, "master4.teeworlds.com:8300").await;
-    let mut server_count = 0;
-
-    let mut addr_list: Vec<Addr6Packed> = vec![];
-    let mut server_count4: Option<u16> = None;
-
-    recieve_master_results(&socket, &mut addr_list, &mut server_count4).await;
-    println!("Sending 3");
-    send_master_request(&socket, "master3.teeworlds.com:8300").await;
-
-    //let mut addr_list: Vec<Addr6Packed> = vec![];
-    let mut server_count3: Option<u16> = None;
-
-    recieve_master_results(&socket, &mut addr_list, &mut server_count3).await;
-    println!("Recieving 3");
-
-    
-    server_count += server_count4.unwrap() + server_count3.unwrap();
-    println!("{:?}", server_count);
-    println!("{}", addr_list.len()); */
-
-    //let mut handles_masters = vec![];
-
-
     let mut addr_list: Vec<Addr6Packed> = vec![];
 
     send_recieve_masters("master4.teeworlds.com:8300", &mut addr_list).await;
-
-    println!("Address length: {}", addr_list.len());
-    
     send_recieve_masters("master3.teeworlds.com:8300", &mut addr_list).await;
 
-    println!("Address length: {}", addr_list.len());
-
+    //println!("Address list length: {}", addr_list.len());
 
     let mut handles = vec![];
     let mut results: Vec<Result<Option<ServerInfo>, tokio::task::JoinError>> = vec![];
@@ -63,8 +31,8 @@ async fn main() {
         }
     }
 
-    let mut server_infos = 0;
-    let mut none_server_infos = 0;
+    let mut _server_infos = 0;
+    let mut _none_server_infos = 0;
     let mut online_players: Vec<String> = vec![];
 
     for result in results {
@@ -75,10 +43,10 @@ async fn main() {
                         for client in server_info.clients {
                             online_players.push(client.name.to_string());
                         }
-                        server_infos += 1;
+                        _server_infos += 1;
                     },
                     None => {
-                        none_server_infos +=1;
+                        _none_server_infos +=1;
                     },
                 }
             }
@@ -86,19 +54,9 @@ async fn main() {
         }
     }
 
-    println!("Infos: {}, None: {}", server_infos, none_server_infos);
+    //println!("Infos: {}, None: {}", server_infos, none_server_infos);
 
     let friends = read_friends("/home/johannes/.local/share/ddnet/settings_ddnet.cfg".to_string()).unwrap();
-
-    /* println!("PRINTING PLAYERS");
-    for player in &online_players {
-        println!("{}", player);
-    }
-
-    println!("PRINTING FRIENDS");
-    for friend in &friends {
-        println!("{}", friend);
-    } */
 
     let mut online_friends: Vec<String> = vec![];
 
@@ -109,10 +67,7 @@ async fn main() {
             }
         }
     }
-
-    println!("PRINTING ONLINE FRIENDS");
     for friend in &online_friends {
         println!("{}", friend);
     }
-
 }

@@ -94,6 +94,7 @@ pub async fn recieve_info_result(sock: &UdpSocket) -> Option<ServerInfo> {
                             Some(serv_info) => break Some(serv_info.clone()),
                             None => {
                                 //TODO what to do when more data needs reading
+                                //println!("Cant get for {}", _addr);
                                 break None
                             },
                         }
