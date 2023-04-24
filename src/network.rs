@@ -50,21 +50,15 @@ pub async fn recieve_master_results(sock: &UdpSocket, addr_list: &mut Vec<Addr6P
     }
 }
 
-pub async fn send_recieve_masters(addr: &str, addr_list: &mut Vec<Addr6Packed>) -> Vec<Addr6Packed> {
+pub async fn send_recieve_masters(addr: &str, addr_list: &mut Vec<Addr6Packed>){
     let socket = UdpSocket::bind("0.0.0.0:0").await.expect("could not bind socket");
-    let vec: Vec<Addr6Packed> = vec![];
+    let mut vec: Vec<Addr6Packed> = vec![];
 
     let mut server_count: Option<u16> = Some(0);
 
-    println!("I'm done with {}", socket.local_addr().unwrap());
-
-    println!("I'm sending a request too {}", addr);
     send_master_request(&socket, addr).await;
-    println!("I'm recieving a request from {}", addr);
-    recieve_master_results(&socket, addr_list, &mut server_count).await;
-    println!("I'm done with {}", addr);
-    println!();
-    return vec![];
+    recieve_master_results(&socket, & mut vec, &mut server_count).await;
+    addr_list.append(&mut vec);
 }
 
 pub async fn send_info6_ex_request(sock: &UdpSocket, addr: &str, challenge: u32) -> Option<usize> {

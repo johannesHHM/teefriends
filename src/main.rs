@@ -38,15 +38,14 @@ async fn main() {
 
 
     let mut addr_list: Vec<Addr6Packed> = vec![];
-    let mut addr_list2: Vec<Addr6Packed> = vec![];
 
     send_recieve_masters("master4.teeworlds.com:8300", &mut addr_list).await;
 
-    /* thread::sleep(time::Duration::from_millis(5000));
+    println!("Address length: {}", addr_list.len());
     
-    send_recieve_masters("master4.teeworlds.com:8300", &mut addr_list).await;
+    send_recieve_masters("master3.teeworlds.com:8300", &mut addr_list).await;
 
-    println!("Address length: {}", addr_list.len()); */
+    println!("Address length: {}", addr_list.len());
 
 
     let mut handles = vec![];
@@ -89,9 +88,9 @@ async fn main() {
 
     println!("Infos: {}, None: {}", server_infos, none_server_infos);
 
-    /* let friends = read_friends("/home/johannes/.local/share/ddnet/settings_ddnet.cfg".to_string()).unwrap();
+    let friends = read_friends("/home/johannes/.local/share/ddnet/settings_ddnet.cfg".to_string()).unwrap();
 
-    println!("PRINTING PLAYERS");
+    /* println!("PRINTING PLAYERS");
     for player in &online_players {
         println!("{}", player);
     }
@@ -99,7 +98,7 @@ async fn main() {
     println!("PRINTING FRIENDS");
     for friend in &friends {
         println!("{}", friend);
-    }
+    } */
 
     let mut online_friends: Vec<String> = vec![];
 
@@ -114,6 +113,6 @@ async fn main() {
     println!("PRINTING ONLINE FRIENDS");
     for friend in &online_friends {
         println!("{}", friend);
-    } */
+    }
 
 }
