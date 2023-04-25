@@ -4,6 +4,8 @@ use std::time::Duration;
 use tokio::time::timeout;
 use tokio::net::UdpSocket;
 
+use crate::settings::*;
+
 pub async fn send_master_request(sock: &UdpSocket, addr: &str) {
     let header_count_6: [u8; 14] = request_count();
     let header_list_6 = request_list_6();
@@ -124,4 +126,53 @@ pub async fn send_recieve_server(challenge: u32, addr: String, timeout_millis: u
             return None
         },
     };
+}
+
+pub async fn fetch_friend_data(online_friends: &mut Vec<String>, settings_path: String) {
+    let mut addr_list: Vec<Addr6Packed> = vec![];
+
+    send_recieve_masters("master4.teeworlds.com:8300", &mut addr_list).await;
+    send_recieve_masters("master3.teeworlds.com:8300", &mut addr_list).await;
+
+    let mut handles = vec![];
+    let mut results: Vec<Result<Option<ServerInfo>, tokio::task::JoinError>> = vec![];
+
+    let mut i = 0;
+    for addr in addr_list.as_slice() {
+        let handle = tokio::spawn(send_recieve_server(i, addr.unpack().to_string(), 1000));
+        handles.push(handle);
+        i += 1;
+        if i % 80 == 0 || usize::try_from(i).unwrap() == addr_list.len() {
+            results.append(&mut futures::future::join_all(&mut handles).await);
+            handles.clear();
+        }
+    }
+
+    let mut online_players: Vec<String> = vec![];
+
+    for result in results {
+        match result {
+            Ok(x) => {
+                match x {
+                    Some(server_info) => {
+                        for client in server_info.clients {
+                            online_players.push(client.name.to_string());
+                        }
+                    },
+                    None => (),
+                }
+            }
+            Err(_) => (),
+        }
+    }
+
+    let friends = read_friends(settings_path).unwrap();
+
+    for player in online_players {
+        for friend in &friends {
+            if player.eq(friend) {
+                online_friends.push(friend.to_string());
+            }
+        }
+    }
 }

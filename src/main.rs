@@ -1,61 +1,10 @@
-use serverbrowse::protocol::*;
 use std::vec;
+use clap::{Command, Arg, ArgAction};
 
 mod network;
 mod settings;
 use crate::network::*;
 use crate::settings::*;
-
-async fn fetch_friend_data(online_friends: &mut Vec<String>, settings_path: String) {
-    let mut addr_list: Vec<Addr6Packed> = vec![];
-
-    send_recieve_masters("master4.teeworlds.com:8300", &mut addr_list).await;
-    send_recieve_masters("master3.teeworlds.com:8300", &mut addr_list).await;
-    println!("Done with masters");
-
-    let mut handles = vec![];
-    let mut results: Vec<Result<Option<ServerInfo>, tokio::task::JoinError>> = vec![];
-
-    let mut i = 0;
-    for addr in addr_list.as_slice() {
-        let handle = tokio::spawn(send_recieve_server(i, addr.unpack().to_string(), 1000));
-        handles.push(handle);
-        i += 1;
-        if i % 80 == 0 || usize::try_from(i).unwrap() == addr_list.len() {
-            results.append(&mut futures::future::join_all(&mut handles).await);
-            handles.clear();
-        }
-    }
-    println!("Done with sending");
-
-    let mut online_players: Vec<String> = vec![];
-
-    for result in results {
-        match result {
-            Ok(x) => {
-                match x {
-                    Some(server_info) => {
-                        for client in server_info.clients {
-                            online_players.push(client.name.to_string());
-                        }
-                    },
-                    None => (),
-                }
-            }
-            Err(_) => (),
-        }
-    }
-
-    let friends = read_friends(settings_path).unwrap();
-
-    for player in online_players {
-        for friend in &friends {
-            if player.eq(friend) {
-                online_friends.push(friend.to_string());
-            }
-        }
-    }
-}
 
 fn print_active_friends(online_friends: &Vec<String>) {
     for friend in online_friends {
@@ -68,13 +17,51 @@ fn print_active_friend_count(online_friends: &Vec<String>) {
 
 #[tokio::main]
 async fn main() {
+    let matches = Command::new("teefriends")
+        .version("0.1.0")
+        .author("JohannesHHM")
+        .about("Checks servers for online friends")
+        .arg_required_else_help(true)
+        .arg(
+            Arg::new("count")
+                .short('c')
+                .long("count")
+                .help("Print friend count")
+                .action(ArgAction::SetTrue),
+        )
+        .arg(
+            Arg::new("names")
+                .short('n')
+                .long("names")
+                .help("Print friend names")
+                .action(ArgAction::SetTrue),
+        )
+        .arg(
+            Arg::new("fetch")
+                .short('f')
+                .long("fetch")
+                .help("Update friend storage")
+                .action(ArgAction::SetTrue),
+        )
+        .get_matches();
+
     let mut online_friends: Vec<String> = vec![];
-    //fetch_friend_data(&mut online_friends, "/home/johannes/.local/share/ddnet/settings_ddnet.cfg".to_string()).await;
-    //store_data(&online_friends, "/home/johannes/.local/share/teefriends/friends.txt".to_string()).expect("");
-    read_store_data(&mut online_friends, "/home/johannes/.local/share/teefriends/friends.txt".to_string()).expect("");
 
-    print_active_friends(&online_friends);
-    print_active_friend_count(&online_friends);
+    if matches.get_flag("fetch") {
+        fetch_friend_data(&mut online_friends, "/home/johannes/.local/share/ddnet/settings_ddnet.cfg".to_string()).await;
+        store_data(&online_friends, "/home/johannes/.local/share/teefriends/friends.txt".to_string()).expect("");
+        online_friends.clear();
+    }
 
-    dbg!(online_friends);
+    if matches.get_flag("names") {
+        read_store_data(&mut online_friends, "/home/johannes/.local/share/teefriends/friends.txt".to_string()).expect("");
+        print_active_friends(&online_friends);
+        online_friends.clear();
+    }
+
+    if matches.get_flag("count") {
+        read_store_data(&mut online_friends, "/home/johannes/.local/share/teefriends/friends.txt".to_string()).expect("");
+        print_active_friend_count(&online_friends);
+        online_friends.clear();
+    }
 }
