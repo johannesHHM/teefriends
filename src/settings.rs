@@ -1,4 +1,5 @@
 use std::{fs::File, io::{BufReader, BufRead}};
+use std::fs;
 
 pub fn read_friends(settings_path: String) -> Result<Vec<String>, std::io::Error>{
     let file = File::open(settings_path)?;
@@ -13,4 +14,20 @@ pub fn read_friends(settings_path: String) -> Result<Vec<String>, std::io::Error
         }
     }
     Ok(friends)
+}
+
+pub fn store_data(online_friends: &Vec<String>, store_path: String) -> Result<(), std::io::Error> {
+    fs::write(store_path, online_friends.join("\n"))?;
+    Ok(())
+}
+
+
+pub fn read_store_data(online_friends: &mut Vec<String>, store_path: String) -> Result<(), std::io::Error> {
+    let file = File::open(store_path)?;
+    let reader = BufReader::new(file);
+
+    for line in reader.lines() {
+        online_friends.push(line?);
+    }
+    Ok(())
 }
