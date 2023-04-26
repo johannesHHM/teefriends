@@ -19,12 +19,10 @@ pub async fn recieve_master_results(sock: &UdpSocket, addr_list: &mut Vec<Addr6P
         let mut buf: [u8; 1400] = [0; 1400];
         let (buf_size2, _addr) = sock.recv_from(&mut buf).await.unwrap();
         let buf_size = Some(buf_size2);
-
         match buf_size {
             Some(ref size) => {
                 let buf: &[u8] = &buf[0..*size];
                 let response = parse_response(&buf).unwrap();
-
                 match response {
                     Count(x) => *server_count = Some(x.0),
                     List6(x) => {
@@ -38,8 +36,8 @@ pub async fn recieve_master_results(sock: &UdpSocket, addr_list: &mut Vec<Addr6P
             None => (),
         }
         //TODO remove
-        //dbg!(&addr_list.len());
-        //dbg!(&server_count);
+        dbg!(&addr_list.len());
+        dbg!(&server_count);
         match server_count {
             Some(ref count) => {
                 if addr_list.len() == usize::from(*count) {
@@ -60,6 +58,7 @@ pub async fn send_recieve_masters(addr: &str, addr_list: &mut Vec<Addr6Packed>){
 
     send_master_request(&socket, addr).await;
     recieve_master_results(&socket, & mut vec, &mut server_count).await;
+    dbg!("out of send recieve");
     addr_list.append(&mut vec);
 }
 
@@ -134,6 +133,8 @@ pub async fn fetch_friend_data(online_friends: &mut Vec<String>, settings_path: 
     send_recieve_masters("master4.teeworlds.com:8300", &mut addr_list).await;
     send_recieve_masters("master3.teeworlds.com:8300", &mut addr_list).await;
 
+    dbg!(addr_list.len());
+
     let mut handles = vec![];
     let mut results: Vec<Result<Option<ServerInfo>, tokio::task::JoinError>> = vec![];
 
@@ -147,6 +148,8 @@ pub async fn fetch_friend_data(online_friends: &mut Vec<String>, settings_path: 
             handles.clear();
         }
     }
+
+    dbg!(results.len());
 
     let mut online_players: Vec<String> = vec![];
 

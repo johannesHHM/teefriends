@@ -21,7 +21,6 @@ pub fn store_data(online_friends: &Vec<String>, store_path: String) -> Result<()
     Ok(())
 }
 
-
 pub fn read_store_data(online_friends: &mut Vec<String>, store_path: String) -> Result<(), std::io::Error> {
     let file = File::open(store_path)?;
     let reader = BufReader::new(file);
