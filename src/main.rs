@@ -48,7 +48,9 @@ async fn main() {
     let mut online_friends: Vec<String> = vec![];
 
     if matches.get_flag("fetch") {
-        fetch_friend_data(&mut online_friends, "/home/johannes/.local/share/ddnet/settings_ddnet.cfg".to_string()).await;
+        //fetch_friend_data(&mut online_friends, "/home/johannes/.local/share/ddnet/settings_ddnet.cfg".to_string()).await;
+        fetch_friend_data_smart(&mut online_friends, "/home/johannes/.local/share/ddnet/settings_ddnet.cfg".to_string()).await.expect("OOF");
+
         store_data(&online_friends, "/home/johannes/.local/share/teefriends/friends.txt".to_string()).expect("");
         online_friends.clear();
     }

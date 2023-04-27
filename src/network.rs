@@ -1,8 +1,13 @@
+
 use serverbrowse::protocol::*;
 use serverbrowse::protocol::Response::*;
+use std::error::Error;
 use std::time::Duration;
 use tokio::time::timeout;
 use tokio::net::UdpSocket;
+
+use itertools::Itertools;
+
 
 use crate::settings::*;
 
@@ -135,7 +140,105 @@ pub async fn fetch_friend_data(online_friends: &mut Vec<String>, settings_path: 
 
     dbg!(addr_list.len());
 
-    let mut handles = vec![];
+    let mut handles: Vec<tokio::task::JoinHandle<Option<ServerInfo>>> = vec![];
+    let mut results: Vec<Result<Option<ServerInfo>, tokio::task::JoinError>> = vec![];
+
+    let mut i = 0;
+    for addr in addr_list.as_slice() {
+        let handle: tokio::task::JoinHandle<Option<ServerInfo>> = tokio::spawn(send_recieve_server(i, addr.unpack().to_string(), 1000));
+        handles.push(handle);
+        i += 1;
+        if i % 80 == 0 || usize::try_from(i).unwrap() == addr_list.len() {
+            results.append(&mut futures::future::join_all(&mut handles).await);
+            handles.clear();
+        }
+    }
+
+    dbg!(results.len());
+
+    let mut online_players: Vec<String> = vec![];
+
+    for result in results {
+        match result {
+            Ok(x) => {
+                match x {
+                    Some(server_info) => {
+                        for client in server_info.clients {
+                            online_players.push(client.name.to_string());
+                        }
+                    },
+                    None => (),
+                }
+            }
+            Err(_) => (),
+        }
+    }
+
+    let friends = read_friends(settings_path).unwrap();
+
+    for player in online_players {
+        for friend in &friends {
+            if player.eq(friend) {
+                online_friends.push(friend.to_string());
+            }
+        }
+    }
+}
+
+async fn cool_func(chunk: Vec<Addr6Packed>) -> Option<ServerInfo> {
+    let sock = UdpSocket::bind("0.0.0.0:0").await.expect("big nonono ooof");
+    let res: Option<ServerInfo> = None;
+    for addr in chunk {
+        send_info6_ex_request(&sock, &addr.unpack().to_string(), 0).await;
+        println!("Sent")
+    }
+    loop {
+        match timeout(Duration::from_millis(3000), recieve_info_result(&sock)).await {
+            Ok(x) => {
+                match x {
+                    Some(server_info) => println!("Got {:?}", server_info),
+                    None => println!("Got None"),
+                }
+            }
+            Err(_) => break,
+        }
+    }
+    return res;
+}
+
+pub async fn fetch_friend_data_smart(_online_friends: &mut Vec<String>, _settings_path: String) -> Result<(), std::io::Error> {
+    let mut addr_list: Vec<Addr6Packed> = vec![];
+
+    send_recieve_masters("master4.teeworlds.com:8300", &mut addr_list).await;
+    send_recieve_masters("master3.teeworlds.com:8300", &mut addr_list).await;
+
+    dbg!(addr_list.len());
+
+    const CHUNK_SIZE: usize = 50;
+    const TIMEOUT: u64 = 1000;
+
+    let mut handles: Vec<tokio::task::JoinHandle<Option<ServerInfo>>> = vec![];
+    let mut results: Vec<Result<Option<ServerInfo>, tokio::task::JoinError>> = vec![];
+
+    let chunked_addr: Vec<Vec<Addr6Packed>> = addr_list
+        .into_iter()
+        .chunks(100)
+        .into_iter()
+        .map(|chunk| chunk.collect())
+        .collect();
+
+    for chunk in chunked_addr {
+        //TODO Spawn taks to do this part
+        println!("Sock");
+        let handle: tokio::task::JoinHandle<Option<ServerInfo>> = tokio::spawn(cool_func(chunk));
+        handles.push(handle);
+    }
+
+    results.append(&mut futures::future::join_all(&mut handles).await);
+
+    Ok(())
+
+    /* let mut handles = vec![];
     let mut results: Vec<Result<Option<ServerInfo>, tokio::task::JoinError>> = vec![];
 
     let mut i = 0;
@@ -177,5 +280,5 @@ pub async fn fetch_friend_data(online_friends: &mut Vec<String>, settings_path: 
                 online_friends.push(friend.to_string());
             }
         }
-    }
+    } */
 }
