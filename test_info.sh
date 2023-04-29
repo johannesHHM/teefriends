@@ -9,4 +9,6 @@ grep Sent lines | wc -l
 echo -n "Got: "
 grep Got lines | wc -l
 
+echo -n "None: "
+grep None lines | wc -l
 
