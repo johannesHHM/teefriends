@@ -7,7 +7,4 @@ edition = "2021"
 
 [dependencies]
 serverbrowse = { git = "https://github.com/heinrich5991/libtw2.git" }
-tokio = { version = "1", features = ["full"] }
-futures = "0.3"
 clap = "4.2.4"
-itertools = "0.10.5"

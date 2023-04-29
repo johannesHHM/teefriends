@@ -15,8 +15,7 @@ fn print_active_friend_count(online_friends: &Vec<String>) {
     println!("{}", online_friends.len());
 }
 
-#[tokio::main]
-async fn main() {
+fn main() {
     let matches = Command::new("teefriends")
         .version("0.1.0")
         .author("JohannesHHM")
@@ -48,9 +47,7 @@ async fn main() {
     let mut online_friends: Vec<String> = vec![];
 
     if matches.get_flag("fetch") {
-        //fetch_friend_data(&mut online_friends, "/home/johannes/.local/share/ddnet/settings_ddnet.cfg".to_string()).await;
-        fetch_friend_data_smart(&mut online_friends, "/home/johannes/.local/share/ddnet/settings_ddnet.cfg".to_string()).expect("OOF");
-
+        fetch_friend_data(&mut online_friends, "/home/johannes/.local/share/ddnet/settings_ddnet.cfg".to_string()).expect("OOF");
         store_data(&online_friends, "/home/johannes/.local/share/teefriends/friends.txt".to_string()).expect("");
         online_friends.clear();
     }
