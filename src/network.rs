@@ -60,10 +60,10 @@ fn send_recieve_masters(addr: &str, addr_list: &mut Vec<Addr>) {
 
     send_master_request(&socket, addr);
     match recieve_master_results(&socket, & mut vec, &mut server_count) {
-        Ok(_) => {dbg!("Recieved all servers");},
-        Err(_) => {dbg!("Did not recieve all servers");},
+        Ok(_) => (), //{dbg!("Recieved all servers");},
+        Err(_) => (), //{dbg!("Did not recieve all servers");},
     }
-    dbg!("out of send recieve");
+    //dbg!("out of send recieve");
     addr_list.append(&mut vec);
 }
 
@@ -116,7 +116,7 @@ fn recieve_info_result(
             }
         },
         Info664(_) => {
-            dbg!("Got Info664");
+            //dbg!("Got Info664");
         },
         _ => (),
     }
@@ -141,12 +141,12 @@ pub fn fetch_friend_data(online_friends: &mut Vec<String>, settings_path: String
     send_recieve_masters("master4.teeworlds.com:8300", &mut addr_list);
     send_recieve_masters("master3.teeworlds.com:8300", &mut addr_list);
 
-    dbg!(addr_list.len());
+    //dbg!(addr_list.len());
     //100, 200  100, 150?
     const CHUNK_SIZE: usize = 100;
     const TIMEOUT: u64 = 250;
 
-    dbg!(CHUNK_SIZE, TIMEOUT);
+    //dbg!(CHUNK_SIZE, TIMEOUT);
 
     let mut server_infos: HashMap<Addr, ServerInfo> = HashMap::new();
     let mut partial_server_infos: HashMap<Addr, Vec<PartialServerInfo>> = HashMap::new();
@@ -170,19 +170,19 @@ pub fn fetch_friend_data(online_friends: &mut Vec<String>, settings_path: String
             }
             amount += 1;
         }
-        dbg!(amount);
+        //dbg!(amount);
     }
 
     let server_info_length = server_infos.len();
     let partial_server_info_length = partial_server_infos.len();
 
-    dbg!(server_info_length);
-    dbg!(partial_server_info_length);
+    //dbg!(server_info_length);
+    //dbg!(partial_server_info_length);
 
     for (addr, partial_infos) in partial_server_infos {
-        if partial_infos.len() > 1 {
-            dbg!(partial_infos.len());
-        }
+        //if partial_infos.len() > 1 {
+        //    dbg!(partial_infos.len());
+        //}
         match parse_partial_infos(&partial_infos) {
             Some(info) => {server_infos.insert(addr, info);},
             None => (),
@@ -191,8 +191,8 @@ pub fn fetch_friend_data(online_friends: &mut Vec<String>, settings_path: String
 
     let server_info_length = server_infos.len();
 
-    dbg!(server_info_length);
-    dbg!(partial_server_info_length);
+    //dbg!(server_info_length);
+    //dbg!(partial_server_info_length);
 
     let friends = read_friends(settings_path)?;
 
