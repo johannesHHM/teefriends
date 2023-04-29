@@ -144,7 +144,7 @@ pub fn fetch_friend_data(online_friends: &mut Vec<String>, settings_path: String
     dbg!(addr_list.len());
     //100, 200  100, 150?
     const CHUNK_SIZE: usize = 100;
-    const TIMEOUT: u64 = 300;
+    const TIMEOUT: u64 = 250;
 
     dbg!(CHUNK_SIZE, TIMEOUT);
 
