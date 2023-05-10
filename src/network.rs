@@ -162,22 +162,22 @@ pub fn fetch_friend_data(online_friends: &mut Vec<String>, settings_path: String
             chall += 1;
         }
         //sock.set_nonblocking(false).expect("EH");
-        let mut amount = 0;
+        let mut _amount = 0;
         loop {
             match recieve_info_result(&sock, &mut server_infos, &mut partial_server_infos) {
                 Ok(_) => (),
                 Err(_) => break,
             }
-            amount += 1;
+            _amount += 1;
         }
-        //dbg!(amount);
+        //dbg!(_amount);
     }
 
-    let server_info_length = server_infos.len();
-    let partial_server_info_length = partial_server_infos.len();
+    let _server_info_length = server_infos.len();
+    let _partial_server_info_length = partial_server_infos.len();
 
-    //dbg!(server_info_length);
-    //dbg!(partial_server_info_length);
+    //dbg!(_server_info_length);
+    //dbg!(_partial_server_info_length);
 
     for (addr, partial_infos) in partial_server_infos {
         //if partial_infos.len() > 1 {
@@ -189,10 +189,10 @@ pub fn fetch_friend_data(online_friends: &mut Vec<String>, settings_path: String
         }
     }
 
-    let server_info_length = server_infos.len();
+    let _server_info_length = server_infos.len();
 
-    //dbg!(server_info_length);
-    //dbg!(partial_server_info_length);
+    //dbg!(_server_info_length);
+    //dbg!(_partial_server_info_length);
 
     let friends = read_friends(settings_path)?;
 

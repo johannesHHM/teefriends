@@ -17,7 +17,7 @@ pub fn read_friends(settings_path: String) -> Result<Vec<String>, std::io::Error
 }
 
 pub fn store_data(online_friends: &Vec<String>, store_path: String) -> Result<(), std::io::Error> {
-    fs::write(store_path, online_friends.join("\n"))?;
+    fs::write(store_path, online_friends.join("\n") + "\n")?;
     Ok(())
 }
 
