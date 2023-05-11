@@ -9,7 +9,6 @@ friend_name_list = []
 active_friend_list = []
 
 data_dir = user_data_dir()
-print(data_dir)
 
 ddnet_settings_path = data_dir + "/ddnet/settings_ddnet.cfg"
 if not os.path.exists(ddnet_settings_path):
