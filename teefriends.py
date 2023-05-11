@@ -35,12 +35,14 @@ def fill_active_friend_list():
                     active_friend_list.append(client.get("name"))
 
 def store_data():
-    data = open(teefriends_store_path + "/friends.txt", "w+")
+    data = open(teefriends_store_path + "/friends.txt", "w")
     for name in active_friend_list:
         data.write(name + "\n")
 
 def get_store_data():
-    data = open(teefriends_store_path + "/friends.txt", "a+")
+    if not os.path.isfile(teefriends_store_path + "/friends.txt"):
+        open(teefriends_store_path + "/friends.txt", "x")
+    data = open(teefriends_store_path + "/friends.txt", "r")
     active_friend_list.clear()
     for name in data:
         active_friend_list.append(name)
