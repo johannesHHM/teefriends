@@ -6,6 +6,8 @@ mod settings;
 use crate::network::*;
 use crate::settings::*;
 
+use std::process::exit;
+
 fn print_active_friends(online_friends: &Vec<String>) {
     for friend in online_friends {
         println!("{}", friend);
@@ -44,23 +46,41 @@ fn main() {
         )
         .get_matches();
 
+    let data_dir = get_data_dir();
+
+    if data_dir.is_none() {
+        println!("[ERROR] Could not get data directory!");
+        exit(1);
+    }
+
+    let data_dir = data_dir.unwrap();
+
     let mut online_friends: Vec<String> = vec![];
+    let store_path = String::from(data_dir.clone() + "/teefriends");
+    let settings_path = String::from(data_dir.clone() + "/ddnet/settings_ddnet.cfg");
 
     if matches.get_flag("fetch") {
-        fetch_friend_data(&mut online_friends, "/home/johannes/.local/share/ddnet/settings_ddnet.cfg".to_string()).expect("OOF");
-        store_data(&online_friends, "/home/johannes/.local/share/teefriends/friends.txt".to_string()).expect("");
+        fetch_friend_data(&mut online_friends, &settings_path).expect("");
+        match store_data(&online_friends, &store_path) {
+            Ok(()) => (),
+            Err(_) => println!("[ERROR] Could not write to store data!"),
+        }
         online_friends.clear();
     }
 
     if matches.get_flag("names") {
-        read_store_data(&mut online_friends, "/home/johannes/.local/share/teefriends/friends.txt".to_string()).expect("");
-        print_active_friends(&online_friends);
+        match read_store_data(&mut online_friends, &store_path) {
+            Ok(()) => print_active_friends(&online_friends),
+            Err(_) => println!("[ERROR] Could not read from store data!"),
+        }
         online_friends.clear();
     }
 
     if matches.get_flag("count") {
-        read_store_data(&mut online_friends, "/home/johannes/.local/share/teefriends/friends.txt".to_string()).expect("");
-        print_active_friend_count(&online_friends);
+        match read_store_data(&mut online_friends, &store_path) {
+            Ok(()) => print_active_friend_count(&online_friends),
+            Err(_) => println!("[ERROR] Could not read from store data!"),
+        }
         online_friends.clear();
     }
 }

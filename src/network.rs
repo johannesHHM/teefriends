@@ -135,7 +135,7 @@ fn parse_partial_infos(partial_infos: & Vec<PartialServerInfo>) -> Option<Server
     info.take_info()
 }
 
-pub fn fetch_friend_data(online_friends: &mut Vec<String>, settings_path: String) -> Result<(), Error> {
+pub fn fetch_friend_data(online_friends: &mut Vec<String>, settings_path: &String) -> Result<(), Error> {
     let mut addr_list: Vec<Addr> = vec![];
 
     send_recieve_masters("master4.teeworlds.com:8300", &mut addr_list);

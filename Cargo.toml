@@ -8,3 +8,4 @@ edition = "2021"
 [dependencies]
 serverbrowse = { git = "https://github.com/heinrich5991/libtw2.git" }
 clap = "4.2.4"
+dirs = "5.0.1"
